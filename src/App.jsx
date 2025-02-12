@@ -34,15 +34,15 @@ export default function ChatbotUI() {
       <Header />
       <div className="grow w-full flex flex-row justify-between">
         <SideNav />
-        <div className="grow shadow-lg rounded-2xl overflow-hidden bg-white">
-          <div className="p-4 space-y-4 h-[500px] overflow-y-auto">
+        <div className="flex flex-col grow shadow-lg rounded-2xl overflow-hidden bg-white">
+          <div className="grow p-4 space-y-4 h-[500px] overflow-y-auto">
             {messages.map((msg, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
-                className={`p-3 rounded-lg max-w-xs ${
+                className={`text-left p-3 rounded-lg w-fit max-w-md ${
                   msg.sender === "user"
                     ? "bg-blue-500 text-white self-end ml-auto"
                     : "bg-gray-300 text-black self-start"
@@ -53,11 +53,11 @@ export default function ChatbotUI() {
             ))}
           </div>
           <div className="p-4 flex items-center gap-2 border-t">
-            <input
+            <input 
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type a message..."
-              className="flex-1 border p-2 rounded"
+              className="flex-1 border border-gray-500 p-2 rounded text-gray-500"
               onKeyDown={(e) => e.key === "Enter" && sendMessage()}
             />
             <button onClick={sendMessage} className="bg-blue-500 text-white px-4 py-2 rounded">
