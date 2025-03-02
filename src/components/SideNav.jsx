@@ -1,73 +1,56 @@
 import React, { useState } from "react";
-import { TrashIcon } from "@heroicons/react/20/solid";  // Ensure you're using the correct import path for v2
+import { Home, Files, PlusCircle, ChevronLeft, ChevronRight } from "lucide-react";
 
-const SideNav = () => {
-  const [selectedFile, setSelectedFile] = useState(null);
+const SideNav = ({ onResetChat }) => {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [showText, setShowText] = useState(true);
 
-  const handleFileChange = (event) => {
-    setSelectedFile(event.target.files[0]);
-  };
-
-  const handleUpload = () => {
-    if (selectedFile) {
-      alert(`File uploaded: ${selectedFile.name}`);
-      // Handle file upload logic here
+  const handleToggle = () => {
+    if (isCollapsed) {
+      setIsCollapsed(false);
+      setTimeout(() => setShowText(true), 300); // Delay text appearance
     } else {
-      alert("Please select a file first.");
+      setShowText(false);
+      setIsCollapsed(true);
     }
   };
 
-  const handleDelete = () => {
-    setSelectedFile(null); // Clear the file selection
-    document.getElementById("file-input").value = null; // Reset the input field
-  };
-
   return (
-    <aside className="w-2xs hg-full max-w-lg bg-gray-800 text-white h-full p-4 text-left">
-      <h2 className="text-xl font-bold mb-4">Navigation</h2>
-      <ul className="space-y-2">
-        <li className="p-2 hover:bg-gray-700 rounded cursor-pointer">Home</li>
-        <li className="p-2 hover:bg-gray-700 rounded cursor-pointer">Documents</li>
-        <li className="p-2 hover:bg-gray-700 rounded cursor-pointer">Settings</li>
-      </ul>
-
-      <div className="mt-6">
-        <h3 className="text-lg font-semibold mb-2">Upload Document</h3>
-
-        {/* Custom File Upload Button */}
-        <label className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded cursor-pointer inline-block text-center">
-          Choose File
-          <input 
-            id="file-input" // Added id to access the input field
-            type="file" 
-            onChange={handleFileChange} 
-            className="hidden"
-          />
-        </label>
-
-        {/* Display selected file name with Delete button */}
-        {selectedFile && (
-          <div className="mt-2 flex items-center">
-            <p className="text-gray-300 flex-grow">{selectedFile.name}</p>
-            <button 
-              onClick={handleDelete} 
-              className="bg-red-500 hover:bg-red-600 text-white p-2 rounded ml-2"
-            >
-              <TrashIcon className="h-5 w-5" />
-            </button>
-          </div>
-        )}
-
-        {/* Show Upload Button only if a file is selected */}
-        {selectedFile && (
-          <button
-            onClick={handleUpload}
-            className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded cursor-pointer mt-3 w-full"
-          >
-            Upload
-          </button>
-        )}
+    <aside className={`h-full p-4 text-left dark:bg-gray-800 transition-all duration-300 ${isCollapsed ? "w-16" : "w-72"}`}>
+      <div className="flex items-center justify-between mb-6 mt-2 h-8">
+        {!isCollapsed && <h2 className="text-xl font-bold text-white">Navigation</h2>}
+        <button 
+          onClick={handleToggle} 
+          className="text-white p-1 rounded hover:bg-gray-700">
+          {isCollapsed ? <ChevronRight /> : <ChevronLeft />}
+        </button>
       </div>
+      <ul className={`space-y-2 ${isCollapsed ? "items-center" : ""}`}>
+        <li className="hover:bg-gray-700 rounded w-full">
+          <button 
+            onClick={onResetChat} 
+            className="flex items-center gap-2 text-left text-white py-2 rounded cursor-pointer w-full h-8 p-1">
+            <PlusCircle className="w-5 h-5" />
+            {showText && !isCollapsed && "New Chat"}
+          </button>
+        </li>
+        <li className="hover:bg-gray-700 rounded w-full">
+          <button 
+            onClick={onResetChat} 
+            className="flex items-center gap-2 text-left text-white py-2 rounded cursor-pointer w-full h-8 p-1">
+            <Home className="w-5 h-5" />
+            {showText && !isCollapsed && "Home"}
+          </button>
+        </li>
+        <li className="hover:bg-gray-700 rounded w-full">
+          <button 
+            onClick={onResetChat} 
+            className="flex items-center gap-2 text-left text-white py-2 rounded cursor-pointer w-full h-8 p-1">
+            <Files className="w-5 h-5" />
+            {showText && !isCollapsed && "Documents"}
+          </button>
+        </li>
+      </ul>
     </aside>
   );
 };
