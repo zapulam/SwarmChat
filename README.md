@@ -1,92 +1,90 @@
-# AI Chatbot with Image and Text Input
+# React + FastAPI Image Chatbot App
 
-## Overview
-This project is a web application that allows users to upload images and text as input to interact with an AI-powered agentic chatbot. The application consists of a React frontend and a FastAPI backend, enabling seamless communication between the user and the AI model.
+This is a full-stack web application featuring a chatbot interface where users can upload images and text to chat about the uploaded content. The app consists of a React frontend for user interaction and a FastAPI backend for processing and handling chat requests.
 
 ## Features
-- Upload images and text as input
-- AI chatbot capable of discussing and analyzing the provided image and text
-- Real-time conversation with the chatbot
-- Secure and scalable architecture using FastAPI and React
+
+- Users can upload images and text.
+- The chatbot processes the uploaded content and engages in a conversation about the images and text.
+- Real-time communication between the frontend and backend.
+- Easy-to-use UI with support for multiple uploads.
 
 ## Tech Stack
-### Frontend
-- React (with Vite or Create React App)
-- TailwindCSS (optional for styling)
-- Axios (for API requests)
-- WebSockets (for real-time communication, if applicable)
 
-### Backend
-- FastAPI
-- OpenAI API (or another LLM API)
-- Pillow (for image processing)
-- Pydantic (for request validation)
-- Uvicorn (for running the FastAPI server)
+- **Frontend**: Vite React.js
+- **Backend**: FastAPI
 
 ## Installation
+
 ### Prerequisites
-- Node.js and npm installed
-- Python 3.9+ installed
-- Virtual environment (optional but recommended)
 
-### Backend Setup
-```sh
-# Clone the repository
-git clone <repo-url>
-cd backend
+- Python 3.12
+- Node.js and npm
+- FastAPI
+- React
 
-# Create a virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+### Backend (FastAPI)
 
-# Install dependencies
-pip install -r requirements.txt
+1. Clone the repository:
 
-# Run FastAPI server
-uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-```
+   ```bash
+   git clone https://capgeminiAI-A@dev.azure.com/capgeminiAI-A/AIA_Incubator/_git/Project_Steel
+   cd Project_Steel
+   ```
 
-### Frontend Setup
-```sh
-# Navigate to the frontend directory
-cd frontend
+2. Create a virtual environment
 
-# Install dependencies
-npm install
+    ```bash
+    cd backend
+    python -m venv .venv
+    . .venv/bin/activate
+    ```
 
-# Start the React development server
-npm run dev  # or `npm start` if using Create React App
-```
+3. Install the required Python packages
 
-## Usage
-1. Start the FastAPI backend server.
-2. Start the React frontend application.
-3. Upload an image and provide some text input.
-4. Interact with the chatbot, discussing and analyzing the provided input.
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-## API Endpoints
-### `POST /upload`
-- Accepts an image and text input
-- Returns processed response from the chatbot
+4. Start the FastAPI backend
 
-### `GET /chat`
-- Initiates a chat session
+    ```bash
+    uvicorn app.main:app --reload
+    ```
 
-### `POST /chat`
-- Sends user messages and receives responses
+The FastAPI backend should now be running at http://localhost:8000.
 
-## Deployment
-For production deployment:
-- Use Docker to containerize the application.
-- Deploy the FastAPI backend on an Azure App Service or AWS Lambda.
-- Deploy the React frontend using Vercel, Netlify, or an Nginx server.
+### Frontend (React)
 
-## License
-This project is licensed under the MIT License.
+1. In a new terminal navigate to the project root
 
-## Contributing
-Feel free to open issues and pull requests for improvements.
+2. Install dependencies in the root directory:
 
-## Contact
-For inquiries, contact [Your Name] at [Your Email].
+    ```bash
+    npm install
+    ```
 
+3. Start the React development server
+
+    ```bash
+    npm run dev
+    ```
+
+The React frontend should now be running at http://localhost:5173.
+
+### Usage
+
+1. Visit the frontend on your browser.
+
+2. Upload an image or provide text for the chatbot.
+
+3. Engage in a conversation with the chatbot about the uploaded content.
+
+4. The backend will process the content and respond accordingly.
+
+### API Endpoints
+
+POST /chat: Send a message to the chatbot about the uploaded content.
+
+- Request body: JSON with the message text and associated image ID (if any).
+- Response: Chatbot's response.

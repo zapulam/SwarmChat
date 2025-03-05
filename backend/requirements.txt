@@ -1,0 +1,6 @@
+fastapi
+pyyaml
+openai
+azure-identity
+uvicorn
+langchain-openai

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Send, Trash2 } from "lucide-react";
+import { Send } from "lucide-react";
 import { motion } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import Header from "./components/Header";
@@ -12,55 +12,119 @@ export default function ChatbotUI() {
   const [images, setImages] = useState([]);
   const [chatStarted, setChatStarted] = useState(false);
 
-  const handleImageUpload = (imageSrc) => {
-    // Check for valid image data before updating the state
-    if (imageSrc && typeof imageSrc === "string" && imageSrc.startsWith("data:image")) {
-      setImages((prevImages) => [...prevImages, imageSrc]);
-    } else {
-      console.warn("Attempted to add an empty or invalid image.");
+  const handleImageUpload = (updatedFiles) => {
+    // Ensure updatedFiles is an array of File objects
+    if (!Array.isArray(updatedFiles)) {
+      console.error('Expected updatedFiles to be an array, but got:', updatedFiles);
+      return;
     }
-  };  
   
-  const handleStartChat = (imageSrc, initialMessage) => {
+    const base64Images = updatedFiles.map((file) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      return new Promise((resolve) => {
+        reader.onloadend = () => resolve(reader.result);
+      });
+    });
+  
+    // Once all files are read as base64, update the images state
+    Promise.all(base64Images).then((base64Images) => {
+      setImages(base64Images); // Set base64 images in state
+    });
+  };
+  
+  
+  const handleStartChat = async (selectedFiles, initialMessage) => {
     setChatStarted(true);
     const newMessages = [];
   
-    // Ensure imageSrc is valid before adding to the images array
-    if (imageSrc && imageSrc !== "") {
-      handleImageUpload(imageSrc);
-      newMessages.push({ text: "*Uploaded Images*", sender: "bot" });
+    if (selectedFiles.length > 0) {
+      // Convert files to base64 before adding to images state
+      const base64Images = await Promise.all(
+        selectedFiles.map((file) => {
+          return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.readAsDataURL(file);
+          });
+        })
+      );
+  
+      // Only update images if it's a new set of base64-encoded images
+      setImages((prevImages) => {
+        const uniqueBase64Images = base64Images.filter((img) => !prevImages.includes(img));
+        return [...prevImages, ...uniqueBase64Images];
+      });
     }
   
     if (initialMessage.trim()) {
-      newMessages.push({ text: initialMessage, sender: "user" });
-  
-      // Simulate bot response after 1 second
-      setTimeout(() => {
-        setMessages((prev) => [
-          ...prev,
-          { text: "I'm just a demo chatbot. I can't provide real answers yet!", sender: "bot" }
-        ]);
-      }, 1000);
+      newMessages.push({ text: initialMessage, role: "user" });
     }
   
-    setMessages((prev) => [...prev, ...newMessages]);
-  };  
-
-  const sendMessage = () => {
-    if (!input.trim()) return;
-
-    const userMessage = { text: input, sender: "user" };
-    setMessages([...messages, userMessage]);
-    setInput("");
-
-    setTimeout(() => {
-      const botResponse = {
-        text: "I'm just a demo chatbot. I can't provide real answers yet!",
-        sender: "bot",
-      };
-      setMessages((prev) => [...prev, botResponse]);
-    }, 1000);
+    const updatedMessages = [...messages, ...newMessages];
+  
+    if (newMessages.length > 0) {
+      setMessages(updatedMessages); // Update chat history
+      try {
+        console.log("Sending conversation to API:", updatedMessages);
+  
+        // Call API to get LLM response
+        const response = await fetch("http://127.0.0.1:8000/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            conversation: updatedMessages,
+            images: images
+          }),
+        });
+  
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.detail || "Failed to get response");
+  
+        setMessages((prev) => [...prev, { text: data.response, role: "assistant" }]);
+  
+      } catch (error) {
+        console.error("Error:", error);
+        setMessages((prev) => [...prev, { text: "Error: Unable to get response.", role: "assistant" }]);
+      }
+    }
   };
+  
+
+  const sendMessage = async () => {
+    if (!input.trim() && images.length === 0) return; // Ensure we have either text or images
+
+    const userMessage = { text: input, role: "user" };
+
+    // Update chat history before making API call
+    const updatedMessages = [...messages, userMessage];
+    setMessages(updatedMessages);
+    setInput(""); // Clear input field
+
+    try {
+        const response = await fetch("http://127.0.0.1:8000/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                conversation: updatedMessages,
+                images: images
+            }),
+        });
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.detail || "Failed to get response");
+
+        // Add assistant response to chat
+        const botResponse = { text: data.response, role: "assistant" };
+        setMessages((prev) => [...prev, botResponse]);
+        //setImages([]); // Clear images after sending
+
+    } catch (error) {
+        console.error("Error:", error);
+        setMessages((prev) => [...prev, { text: "Error: Unable to get response.", role: "assistant" }]);
+    }
+  };
+
 
   const resetChat = () => {
     setMessages([]);
@@ -72,20 +136,24 @@ export default function ChatbotUI() {
   return (
     <div className="flex flex-row w-screen h-screen items-center min-h-screen">
       <SideNav onResetChat={resetChat} />
-      <div className="h-full w-full flex flex-col justify-between dark:bg-gray-900">
+      <div className="h-full w-full flex flex-col justify-between dark:bg-gray-900 overflow-hidden">
         <Header />
         
         {!chatStarted ? (
-          <UploadBox onImageUpload={handleImageUpload} onStartChat={handleStartChat} />
+          <UploadBox 
+            onImageUpload={handleImageUpload} 
+            onStartChat={handleStartChat} 
+            setMessages={setMessages} 
+          />
         ) : (
           <div className="flex flex-col grow shadow-lg overflow-hidden">
 
             {/* Main content area */}
-            <div className="flex flex-col content-center grow p-4 space-y-4 h-[500px] overflow-y-auto">
+            <div className="flex flex-col content-center grow p-4 space-y-4 h-[500px] overflow-y-auto scrollbar-none">
               
               {/* Uploaded Images Section */}
               {images.length > 0 && (
-                <div className="px-[10vw] space-y-2 grid grid-cols-2 md:grid-cols-3 gap-4 mb-2">
+                <div className="px-[10vw] space-y-6 grid grid-cols-2 md:grid-cols-3 gap-4 mb-2">
                   {images.map((img, index) => (
                     <motion.div
                       key={index}
@@ -105,20 +173,22 @@ export default function ChatbotUI() {
               )}
 
               {/* Chat Messages */}
-              <div className="px-[10vw] space-y-2">
+              <div className="px-[10vw] space-y-6">
                 {messages.map((msg, index) => (
                   <motion.div
                     key={index}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3 }}
-                    className={`text-left p-3 rounded-lg w-fit max-w-md bg-gray-700 text-white ${
-                      msg.sender === "user"
-                        ? "bg-blue-500 text-white self-end ml-auto"
-                        : "bg-gray-300 text-black self-start"
+                    className={`text-left p-3 rounded-lg w-fit max-w-2xl text-white ${
+                      msg.role === "user"
+                        ? "bg-gray-800 text-white self-end ml-auto"
+                        : "bg-gray-800 text-black self-start"
                     }`}
                   >
-                    <ReactMarkdown>{msg.text}</ReactMarkdown>
+                    <div className="whitespace-pre-wrap">
+                      <ReactMarkdown>{msg.text}</ReactMarkdown>
+                    </div>
                   </motion.div>
                 ))}
               </div>
@@ -130,7 +200,7 @@ export default function ChatbotUI() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Type a message..."
-                className="flex-1 border border-gray-500 p-2 rounded text-gray-500"
+                className="text-gray-100 border-gray-300 flex-1 border p-2 rounded"
                 onKeyDown={(e) => e.key === "Enter" && sendMessage()}
               />
               <button onClick={sendMessage} className="bg-green-600 hover:bg-green-400 transition duration-300 text-white px-3 py-2 rounded cursor-pointer">

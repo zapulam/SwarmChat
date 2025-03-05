@@ -1,5 +1,5 @@
 {
-  "name": "swarmchat",
+  "name": "imagechat",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -16,8 +16,10 @@
     "lucide-react": "^0.475.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-markdown": "^10.0.0",
-    "styled-components": "^6.1.15"
+    "react-markdown": "^10.0.1",
+    "remark-gfm": "^4.0.1",
+    "styled-components": "^6.1.15",
+    "tailwind-scrollbar": "^4.0.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.19.0",
