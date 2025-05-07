@@ -28,7 +28,7 @@ This is a full-stack web application featuring a chatbot interface where users c
 1. Clone the repository:
 
    ```bash
-   git clone 
+   git clone https://github.com/zapulam/SwarmChat.git
    cd SwarmChat
    ```
 
