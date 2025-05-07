@@ -28,8 +28,8 @@ This is a full-stack web application featuring a chatbot interface where users c
 1. Clone the repository:
 
    ```bash
-   git clone https://capgeminiAI-A@dev.azure.com/capgeminiAI-A/AIA_Incubator/_git/Project_Steel
-   cd Project_Steel
+   git clone 
+   cd SwarmChat
    ```
 
 2. Create a virtual environment
